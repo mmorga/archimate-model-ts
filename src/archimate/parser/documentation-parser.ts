@@ -1,14 +1,6 @@
 class DocumentationParser {
-  public parentElement: Element;
-  public docElementName: string;
-
-  constructor(parentElement: Element, docElementName?: string) {
-    this.parentElement = parentElement;
-    this.docElementName = docElementName || "documentation";
-  }
-
-  value() {
-    const docEl = this.parentElement.querySelector(`>${this.docElementName}`);
+  value(parentElement: Element, docElementName?: string) {
+    const docEl = parentElement.querySelector(`>${docElementName}`);
     if (docEl === null) {
       return undefined;
     }

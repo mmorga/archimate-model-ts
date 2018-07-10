@@ -2,33 +2,6 @@ import {getStringAttribute} from "./parser/dom-helpers";
 import {Model} from "./model";
 import {ElementParser} from "./parser/element-parser";
 
-// when "element"
-//   element_type = Hash[attrs]["xsi:type"].sub(/archimate:/, '')
-//   case element_type
-//   when DataModel::Elements
-//     Element
-//   when DataModel::DiagramType
-//     Diagram
-//   when DataModel::Relationships
-//     Relationship
-//   else
-//     raise "Unexpected element_type #{element_type}"
-//   end
-// when "property"
-//   Property
-// when "folder"
-//   Organization
-// when "child"
-//   ViewNode
-// when "bounds"
-//   Bounds
-// when "sourceConnection"
-//   Connection
-// when "bendpoint"
-//   Location
-// when "content"
-//   Content
-
 export class ArchiFileReader {
   parse(doc: XMLDocument) {
     const model = this.parseModel(doc);
@@ -44,7 +17,7 @@ export class ArchiFileReader {
     const modelNode = modelNodes[0];
     model.id = getStringAttribute(modelNode, "id") || "";
     model.name = getStringAttribute(modelNode, "name") || "";
-    model.documentation = (new DocumentationParser(modelNode, "purpose")).value();
+    model.documentation = (new DocumentationParser()).value(modelNode, "purpose");
     (new ElementParser(model, doc)).elements();
     return model;
   }

@@ -2,22 +2,28 @@ import {IHasProperties, IIdentifiable} from "./archimate";
 import {Model} from "./model";
 import {Property} from "./property";
 
-export class Diagram implements IIdentifiable, IHasProperties {
-  id: string;
-  name?: string;
-  documentation?: string;
-  type?: string;
-  properties: Array<Property>;
-  viewpoint?: string;
-  nodes: Array<object>;
-  connectionRouterType?: string;
-  background?: string;
-  connections: Array<object>;
-  model: Model;
+export enum DiagramType {
+  ArchimateDiagramModel = "ArchimateDiagramModel",
+  SketchModel = "SketchModel",
+}
 
-  constructor(model: Model) {
+export class Diagram implements IIdentifiable, IHasProperties {
+  public id: string;
+  public name?: string;
+  public documentation?: string;
+  public type?: string;
+  public properties: Array<Property>;
+  public viewpoint?: string;
+  public nodes: Array<object>;
+  public connectionRouterType?: string;
+  public background?: string;
+  public connections: Array<object>;
+  // private model: Model;
+
+  constructor(model: Model, type: DiagramType) {
+    // this.model = model;
     this.id = model.makeUniqueId();
-    this.model = model;
+    this.type = type;
     this.properties = [];
     this.nodes = [];
     this.connections = [];

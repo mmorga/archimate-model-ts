@@ -1,17 +1,38 @@
+import {DiagramParser} from "./diagram-parser";
 import {getStringAttribute} from "./dom-helpers";
 import {Model} from "../model";
 import {PropertiesParser} from "./properties-parser";
+import {DiagramType} from "../diagram";
 import {Element as ArchiElement, ElementType} from "../element";
 import {Relationship, RelationshipType} from "../relationship";
+
+// when "folder"
+//   Organization
+// when "child"
+//   ViewNode
+// when "bounds"
+//   Bounds
+// when "sourceConnection"
+//   Connection
+// when "bendpoint"
+//   Location
+// when "content"
+//   Content
 
 export class ElementParser {
   public model: Model;
   public doc: XMLDocument;
+  private diagramParser: DiagramParser;
+  private documentationParser: DocumentationParser;
+  private propertiesParser: PropertiesParser;
 
   constructor(model: Model, doc: XMLDocument) {
     this.model = model;
     this.doc = doc;
     this.handleElement = this.handleElement.bind(this);
+    this.diagramParser = new DiagramParser(model);
+    this.documentationParser = new DocumentationParser();
+    this.propertiesParser = new PropertiesParser(model);
   }
 
   elements() {
@@ -26,8 +47,8 @@ export class ElementParser {
     const archiEl = new ArchiElement(this.model, type);
     archiEl.id = getStringAttribute(el, "id") || "";
     archiEl.name = getStringAttribute(el, "name") || "";
-    archiEl.documentation = (new DocumentationParser(el)).value();
-    (new PropertiesParser(this.model, archiEl, el)).properties();
+    archiEl.documentation = this.documentationParser.value(el);
+    archiEl.properties = this.propertiesParser.properties(el);
     this.model.elements.push(archiEl);
   }
 
@@ -35,9 +56,13 @@ export class ElementParser {
     const archiEl = new Relationship(this.model, type);
     archiEl.id = getStringAttribute(el, "id") || "";
     archiEl.name = getStringAttribute(el, "name") || "";
-    archiEl.documentation = (new DocumentationParser(el)).value();
-    (new PropertiesParser(this.model, archiEl, el)).properties();
+    archiEl.documentation = this.documentationParser.value(el);
+    archiEl.properties = this.propertiesParser.properties(el);
     this.model.relationships.push(archiEl);
+  }
+
+  parseArchimateDiagram(el: Element, type: DiagramType) {
+    this.model.relationships.push(this.diagramParser.diagram(el, type));
   }
 
   handleElement(el: Element) {
@@ -293,6 +318,12 @@ export class ElementParser {
         break;
       case RelationshipType.OrJunction:
         this.parseArchimateRelationship(el, RelationshipType.OrJunction);
+        break;
+      case DiagramType.ArchimateDiagramModel:
+        this.parseArchimateDiagram(el, DiagramType.ArchimateDiagramModel);
+        break;
+      case DiagramType.SketchModel:
+        this.parseArchimateDiagram(el, DiagramType.SketchModel);
         break;
       default:
         throw `Unexpected Element Type ${typeStr}`;

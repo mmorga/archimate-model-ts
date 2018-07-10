@@ -1,26 +1,21 @@
 import {getStringAttribute} from "./dom-helpers";
-import {IHasProperties} from "../archimate";
 import {Model} from "../model";
 import {Property} from "../property";
 
 export class PropertiesParser {
   public model: Model;
-  public owner: IHasProperties;
-  public parent: Element;
 
-  constructor(model: Model, owner: IHasProperties, parent: Element) {
+  constructor(model: Model) {
     this.model = model;
-    this.owner = owner;
-    this.parent = parent;
     this.handleElement = this.handleElement.bind(this);
   }
 
-  properties() {
-    const els = this.parent.querySelectorAll(">property");
+  properties(parent: Element) {
+    const els = parent.querySelectorAll(">property");
     if (els === null) {
-      return;
+      return [];
     }
-    els.forEach(this.handleElement);
+    return Array.from(els).map(this.handleElement);
   }
 
   handleElement(el: Element) {
@@ -29,8 +24,7 @@ export class PropertiesParser {
     if (key === undefined) {
       throw "Property is missing key";
     }
-    const prop = new Property((key as string), value);
-    this.owner.properties.push(prop);
+    return new Property((key as string), value);
   }
 }
 
